@@ -1,0 +1,53 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Add Migros shopping list",
+        "description": "Connect a Migros shopping list using a list ID and bearer token.",
+        "data": {
+          "shopping_list_id": "Shopping list ID",
+          "access_token": "Access token"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Reconnect Migros",
+        "description": "Update the expired Migros bearer token.",
+        "data": {
+          "access_token": "Access token"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to Migros.",
+      "invalid_auth": "Migros authentication failed.",
+      "unknown": "Unexpected error."
+    },
+    "abort": {
+      "already_configured": "This shopping list is already configured.",
+      "reauth_successful": "Migros account reconnected."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Migros options",
+        "data": {
+          "update_interval": "Update interval in minutes"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "item_count": {
+        "name": "Items"
+      },
+      "instore_total": {
+        "name": "In-store total"
+      },
+      "online_total": {
+        "name": "Online total"
+      }
+    }
+  }
+}

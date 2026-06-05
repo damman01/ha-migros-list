@@ -1,0 +1,53 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Migros-Einkaufsliste hinzufügen",
+        "description": "Verbinde eine Migros-Einkaufsliste mit Listen-ID und Bearer-Token.",
+        "data": {
+          "shopping_list_id": "Listen-ID",
+          "access_token": "Access-Token"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Migros erneut verbinden",
+        "description": "Aktualisiere den abgelaufenen Migros-Bearer-Token.",
+        "data": {
+          "access_token": "Access-Token"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Verbindung zu Migros fehlgeschlagen.",
+      "invalid_auth": "Migros-Authentifizierung fehlgeschlagen.",
+      "unknown": "Unerwarteter Fehler."
+    },
+    "abort": {
+      "already_configured": "Diese Einkaufsliste ist bereits eingerichtet.",
+      "reauth_successful": "Migros-Konto wurde erneut verbunden."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Migros-Optionen",
+        "data": {
+          "update_interval": "Aktualisierungsintervall in Minuten"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "item_count": {
+        "name": "Artikel"
+      },
+      "instore_total": {
+        "name": "Filialsumme"
+      },
+      "online_total": {
+        "name": "Online-Summe"
+      }
+    }
+  }
+}

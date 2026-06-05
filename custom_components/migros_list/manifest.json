@@ -1,0 +1,10 @@
+{
+  "domain": "migros_list",
+  "name": "Migros Shopping List",
+  "config_flow": true,
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "loggers": [],
+  "requirements": [],
+  "version": "0.1.0"
+}
