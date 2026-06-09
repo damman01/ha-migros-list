@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from typing import Any
 
 from aiohttp import ClientError, ClientResponseError
@@ -17,9 +18,17 @@ class MigrosApiAuthError(MigrosApiError):
     """Raised when Migros rejects the configured token."""
 
 
+class MigrosApiHttpError(MigrosApiError):
+    """Raised when Migros API responds with an HTTP error."""
+
+    def __init__(self, status_code: int) -> None:
+        super().__init__(f"Migros API returned HTTP {status_code}")
+        self.status_code = status_code
+
+
 class MigrosApiClient:
     def __init__(self, access_token: str, shopping_list_id: str) -> None:
-        self._access_token = access_token
+        self._access_token = self._normalize_access_token(access_token)
         self._shopping_list_id = shopping_list_id
 
     @property
@@ -39,7 +48,7 @@ class MigrosApiClient:
         except ClientResponseError as err:
             if err.status in (401, 403):
                 raise MigrosApiAuthError("Authentication failed") from err
-            raise MigrosApiError(f"Migros API returned HTTP {err.status}") from err
+            raise MigrosApiHttpError(err.status) from err
         except ClientError as err:
             raise MigrosApiError("Could not reach Migros API") from err
         except ValueError as err:
@@ -100,3 +109,19 @@ class MigrosApiClient:
             return float(value)
         except (TypeError, ValueError):
             return fallback
+
+    @staticmethod
+    def _normalize_access_token(access_token: str) -> str:
+        token = access_token.strip()
+        if token.startswith("{"):
+            try:
+                token_data = json.loads(token)
+            except ValueError:
+                token_data = None
+            if isinstance(token_data, dict):
+                extracted = token_data.get("access_token")
+                if isinstance(extracted, str):
+                    token = extracted.strip()
+        if token[:7].lower() == "bearer ":
+            token = token[7:].strip()
+        return token

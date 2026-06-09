@@ -20,6 +20,10 @@
     "error": {
       "cannot_connect": "Verbindung zu Migros fehlgeschlagen.",
       "invalid_auth": "Migros-Authentifizierung fehlgeschlagen.",
+      "invalid_list_id": "Listen-ID nicht gefunden oder kein Zugriff mit diesem Token.",
+      "empty_list_id": "Bitte eine Listen-ID eingeben.",
+      "empty_access_token": "Bitte ein Access-Token eingeben.",
+      "rate_limited": "Zu viele Anfragen an Migros. Bitte in kurzer Zeit erneut versuchen.",
       "unknown": "Unerwarteter Fehler."
     },
     "abort": {

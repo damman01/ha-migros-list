@@ -20,6 +20,10 @@
     "error": {
       "cannot_connect": "Failed to connect to Migros.",
       "invalid_auth": "Migros authentication failed.",
+      "invalid_list_id": "Shopping list ID was not found or is not accessible with this token.",
+      "empty_list_id": "Please enter a shopping list ID.",
+      "empty_access_token": "Please enter an access token.",
+      "rate_limited": "Too many requests to Migros. Please try again shortly.",
       "unknown": "Unexpected error."
     },
     "abort": {

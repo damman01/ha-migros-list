@@ -7,7 +7,7 @@ from homeassistant import config_entries
 from homeassistant.const import CONF_ACCESS_TOKEN
 from homeassistant.data_entry_flow import FlowResult
 
-from .api import MigrosApiAuthError, MigrosApiClient, MigrosApiError
+from .api import MigrosApiAuthError, MigrosApiClient, MigrosApiError, MigrosApiHttpError
 from .const import CONF_LIST_ID, CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL, DOMAIN
 
 
@@ -81,11 +81,22 @@ class MigrosConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return MigrosOptionsFlow(config_entry)
 
     async def _validate_input(self, list_id: str, token: str) -> dict[str, str]:
+        if not list_id:
+            return {"base": "empty_list_id"}
+        if not token:
+            return {"base": "empty_access_token"}
+
         client = MigrosApiClient(access_token=token, shopping_list_id=list_id)
         try:
             await client.async_get_shopping_list(self.hass)
         except MigrosApiAuthError:
             return {"base": "invalid_auth"}
+        except MigrosApiHttpError as err:
+            if err.status_code == 404:
+                return {"base": "invalid_list_id"}
+            if err.status_code == 429:
+                return {"base": "rate_limited"}
+            return {"base": "cannot_connect"}
         except MigrosApiError:
             return {"base": "cannot_connect"}
         except Exception:
