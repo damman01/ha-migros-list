@@ -100,6 +100,13 @@ class MigrosApiClient:
         return {
             "accept": "application/json, text/plain, */*",
             "authorization": f"Bearer {self._access_token}",
+            "user-agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/125.0.0.0 Safari/537.36"
+            ),
+            "origin": "https://www.migros.ch",
+            "referer": "https://www.migros.ch/de/shopping-list",
         }
 
     def _parse_shopping_list(self, payload: dict[str, Any]) -> MigrosShoppingList:
