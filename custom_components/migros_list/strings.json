@@ -2,18 +2,24 @@
   "config": {
     "step": {
       "user": {
-        "title": "Add Migros shopping list",
-        "description": "Connect a Migros shopping list using a list ID and bearer token.",
+        "title": "Sign in to Migros",
+        "description": "To get your access token:\n1. Open [migros.ch]({shopping_list_url}) and sign in.\n2. Open your browser's developer tools (F12) and go to the **Network** tab.\n3. Filter requests by `login-success`.\n4. Reload the page — find the `login-success` request and open its **Response**.\n5. Copy the entire JSON object (starting with `{`) or just the `accessToken` value and paste it below.",
         "data": {
-          "shopping_list_id": "Shopping list ID",
-          "access_token": "Access token"
+          "access_token": "Access token (or full JSON response)"
+        }
+      },
+      "select_list": {
+        "title": "Select shopping list",
+        "description": "Choose which Migros shopping list to add.",
+        "data": {
+          "shopping_list_id": "Shopping list"
         }
       },
       "reauth_confirm": {
         "title": "Reconnect Migros",
-        "description": "Update the expired Migros bearer token.",
+        "description": "Your Migros token has expired. Get a new one:\n1. Open [migros.ch]({shopping_list_url}) and sign in.\n2. Open your browser's developer tools (F12) and go to the **Network** tab.\n3. Filter requests by `login-success`.\n4. Reload the page — find the `login-success` request and open its **Response**.\n5. Copy the entire JSON object (starting with `{`) or just the `accessToken` value and paste it below.",
         "data": {
-          "access_token": "Access token"
+          "access_token": "Access token (or full JSON response)"
         }
       }
     },
@@ -21,8 +27,8 @@
       "cannot_connect": "Failed to connect to Migros.",
       "invalid_auth": "Migros authentication failed.",
       "invalid_list_id": "Shopping list ID was not found or is not accessible with this token.",
-      "empty_list_id": "Please enter a shopping list ID.",
       "empty_access_token": "Please enter an access token.",
+      "no_lists": "No shopping lists found for this account.",
       "rate_limited": "Too many requests to Migros. Please try again shortly.",
       "unknown": "Unexpected error."
     },

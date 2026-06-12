@@ -6,7 +6,7 @@ from typing import Any
 from aiohttp import ClientError, ClientResponseError
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .const import MIGROS_LANGUAGE, MIGROS_LIST_DETAILS_URL, MIGROS_PEER_ID, MIGROS_REFERER
+from .const import MIGROS_LANGUAGE, MIGROS_LIST_DETAILS_URL, MIGROS_LISTS_OVERVIEW_URL, MIGROS_PEER_ID, MIGROS_REFERER
 from .models import MigrosCategory, MigrosShoppingList, MigrosShoppingListItem, MigrosTotals
 
 
@@ -27,13 +27,37 @@ class MigrosApiHttpError(MigrosApiError):
 
 
 class MigrosApiClient:
-    def __init__(self, access_token: str, shopping_list_id: str) -> None:
+    def __init__(self, access_token: str, shopping_list_id: str = "") -> None:
         self._access_token = self._normalize_access_token(access_token)
         self._shopping_list_id = shopping_list_id
 
     @property
     def shopping_list_id(self) -> str:
         return self._shopping_list_id
+
+    async def async_get_lists_overview(self, hass) -> list[dict[str, Any]]:
+        session = async_get_clientsession(hass)
+        try:
+            async with session.get(
+                MIGROS_LISTS_OVERVIEW_URL,
+                headers=self._build_headers(),
+            ) as response:
+                response.raise_for_status()
+                payload = await response.json(content_type=None)
+        except ClientResponseError as err:
+            if err.status in (401, 403):
+                raise MigrosApiAuthError("Authentication failed") from err
+            raise MigrosApiHttpError(err.status) from err
+        except ClientError as err:
+            raise MigrosApiError("Could not reach Migros API") from err
+        except ValueError as err:
+            raise MigrosApiError("Migros API returned invalid JSON") from err
+
+        return [
+            {"id": str(entry["shoppingListId"]), "name": entry["shoppingListName"]}
+            for entry in payload
+            if "shoppingListId" in entry and "shoppingListName" in entry
+        ]
 
     async def async_get_shopping_list(self, hass) -> MigrosShoppingList:
         session = async_get_clientsession(hass)
@@ -119,7 +143,8 @@ class MigrosApiClient:
             except ValueError:
                 token_data = None
             if isinstance(token_data, dict):
-                extracted = token_data.get("access_token")
+                # API response uses camelCase; stored config uses snake_case
+                extracted = token_data.get("accessToken") or token_data.get("access_token")
                 if isinstance(extracted, str):
                     token = extracted.strip()
         if token[:7].lower() == "bearer ":

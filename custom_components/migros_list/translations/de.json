@@ -2,18 +2,24 @@
   "config": {
     "step": {
       "user": {
-        "title": "Migros-Einkaufsliste hinzufügen",
-        "description": "Verbinde eine Migros-Einkaufsliste mit Listen-ID und Bearer-Token.",
+        "title": "Bei Migros anmelden",
+        "description": "So erhältst du deinen Access-Token:\n1. Öffne [migros.ch]({shopping_list_url}) und melde dich an.\n2. Öffne die Browser-Entwicklertools (F12) und gehe zum Tab **Netzwerk**.\n3. Filtere nach `login-success`.\n4. Lade die Seite neu — öffne die **Antwort** der `login-success`-Anfrage.\n5. Kopiere das gesamte JSON-Objekt (beginnend mit `{`) oder nur den Wert von `accessToken` und füge es unten ein.",
         "data": {
-          "shopping_list_id": "Listen-ID",
-          "access_token": "Access-Token"
+          "access_token": "Access-Token (oder vollständige JSON-Antwort)"
+        }
+      },
+      "select_list": {
+        "title": "Einkaufsliste auswählen",
+        "description": "Wähle aus, welche Migros-Einkaufsliste hinzugefügt werden soll.",
+        "data": {
+          "shopping_list_id": "Einkaufsliste"
         }
       },
       "reauth_confirm": {
         "title": "Migros erneut verbinden",
-        "description": "Aktualisiere den abgelaufenen Migros-Bearer-Token.",
+        "description": "Dein Migros-Token ist abgelaufen. Hol dir einen neuen:\n1. Öffne [migros.ch]({shopping_list_url}) und melde dich an.\n2. Öffne die Browser-Entwicklertools (F12) und gehe zum Tab **Netzwerk**.\n3. Filtere nach `login-success`.\n4. Lade die Seite neu — öffne die **Antwort** der `login-success`-Anfrage.\n5. Kopiere das gesamte JSON-Objekt (beginnend mit `{`) oder nur den Wert von `accessToken` und füge es unten ein.",
         "data": {
-          "access_token": "Access-Token"
+          "access_token": "Access-Token (oder vollständige JSON-Antwort)"
         }
       }
     },
@@ -21,8 +27,8 @@
       "cannot_connect": "Verbindung zu Migros fehlgeschlagen.",
       "invalid_auth": "Migros-Authentifizierung fehlgeschlagen.",
       "invalid_list_id": "Listen-ID nicht gefunden oder kein Zugriff mit diesem Token.",
-      "empty_list_id": "Bitte eine Listen-ID eingeben.",
       "empty_access_token": "Bitte ein Access-Token eingeben.",
+      "no_lists": "Keine Einkaufslisten für dieses Konto gefunden.",
       "rate_limited": "Zu viele Anfragen an Migros. Bitte in kurzer Zeit erneut versuchen.",
       "unknown": "Unerwarteter Fehler."
     },

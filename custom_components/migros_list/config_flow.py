@@ -8,49 +8,84 @@ from homeassistant.const import CONF_ACCESS_TOKEN
 from homeassistant.data_entry_flow import FlowResult
 
 from .api import MigrosApiAuthError, MigrosApiClient, MigrosApiError, MigrosApiHttpError
-from .const import CONF_LIST_ID, CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL, DOMAIN
-
-
-STEP_USER_DATA_SCHEMA = vol.Schema(
-    {
-        vol.Required(CONF_LIST_ID): str,
-        vol.Required(CONF_ACCESS_TOKEN): str,
-    }
+from .const import (
+    CONF_LIST_ID,
+    CONF_UPDATE_INTERVAL,
+    DEFAULT_UPDATE_INTERVAL,
+    DOMAIN,
+    MIGROS_SHOPPING_LIST_URL,
 )
+
+_STEP_TOKEN_SCHEMA = vol.Schema({vol.Required(CONF_ACCESS_TOKEN): str})
 
 
 class MigrosConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
+    def __init__(self) -> None:
+        self._token: str = ""
+        self._available_lists: dict[str, str] = {}  # id -> name
+
     async def async_step_user(self, user_input: dict[str, Any] | None = None) -> FlowResult:
         errors: dict[str, str] = {}
 
         if user_input is not None:
-            list_id = user_input[CONF_LIST_ID].strip()
             token = user_input[CONF_ACCESS_TOKEN].strip()
+            if not token:
+                errors["base"] = "empty_access_token"
+            else:
+                client = MigrosApiClient(access_token=token)
+                try:
+                    lists = await client.async_get_lists_overview(self.hass)
+                except MigrosApiAuthError:
+                    errors["base"] = "invalid_auth"
+                except MigrosApiError:
+                    errors["base"] = "cannot_connect"
+                except Exception:
+                    errors["base"] = "unknown"
+                else:
+                    if not lists:
+                        errors["base"] = "no_lists"
+                    else:
+                        self._token = token
+                        self._available_lists = {entry["id"]: entry["name"] for entry in lists}
+                        return await self.async_step_select_list()
+
+        return self.async_show_form(
+            step_id="user",
+            data_schema=_STEP_TOKEN_SCHEMA,
+            errors=errors,
+            description_placeholders={"shopping_list_url": MIGROS_SHOPPING_LIST_URL},
+        )
+
+    async def async_step_select_list(self, user_input: dict[str, Any] | None = None) -> FlowResult:
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            list_id = user_input[CONF_LIST_ID]
+            list_name = self._available_lists[list_id]
 
             await self.async_set_unique_id(list_id)
             self._abort_if_unique_id_configured()
 
-            errors = await self._validate_input(list_id, token)
-            if not errors:
-                return self.async_create_entry(
-                    title=f"Migros {list_id}",
-                    data={
-                        CONF_LIST_ID: list_id,
-                        CONF_ACCESS_TOKEN: token,
-                    },
-                    options={CONF_UPDATE_INTERVAL: DEFAULT_UPDATE_INTERVAL},
-                )
+            return self.async_create_entry(
+                title=list_name,
+                data={
+                    CONF_LIST_ID: list_id,
+                    CONF_ACCESS_TOKEN: self._token,
+                },
+                options={CONF_UPDATE_INTERVAL: DEFAULT_UPDATE_INTERVAL},
+            )
 
         return self.async_show_form(
-            step_id="user",
-            data_schema=STEP_USER_DATA_SCHEMA,
+            step_id="select_list",
+            data_schema=vol.Schema(
+                {vol.Required(CONF_LIST_ID): vol.In(self._available_lists)}
+            ),
             errors=errors,
         )
 
     async def async_step_reauth(self, entry_data: dict[str, Any]) -> FlowResult:
-        self.context["entry_id"] = self._get_reauth_entry().entry_id
         return await self.async_step_reauth_confirm()
 
     async def async_step_reauth_confirm(
@@ -61,7 +96,7 @@ class MigrosConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             token = user_input[CONF_ACCESS_TOKEN].strip()
-            errors = await self._validate_input(str(entry.data[CONF_LIST_ID]), token)
+            errors = await self._validate_token(str(entry.data[CONF_LIST_ID]), token)
             if not errors:
                 self.hass.config_entries.async_update_entry(
                     entry,
@@ -72,17 +107,16 @@ class MigrosConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="reauth_confirm",
-            data_schema=vol.Schema({vol.Required(CONF_ACCESS_TOKEN): str}),
+            data_schema=_STEP_TOKEN_SCHEMA,
             errors=errors,
+            description_placeholders={"shopping_list_url": MIGROS_SHOPPING_LIST_URL},
         )
 
     @staticmethod
     def async_get_options_flow(config_entry: config_entries.ConfigEntry):
         return MigrosOptionsFlow(config_entry)
 
-    async def _validate_input(self, list_id: str, token: str) -> dict[str, str]:
-        if not list_id:
-            return {"base": "empty_list_id"}
+    async def _validate_token(self, list_id: str, token: str) -> dict[str, str]:
         if not token:
             return {"base": "empty_access_token"}
 
