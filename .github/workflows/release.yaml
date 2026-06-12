@@ -34,32 +34,30 @@ jobs:
         id: info
         shell: bash
         run: |
-          {
-            domain="$(yq -r -oj '.domain' custom_components/*/manifest.json)"
-            if [ -z "$domain" ]; then
-              echo >&2 "No domain found in manifest.json. Please check your custom component."
-              exit 1
-            fi
-            hacs_filename="$(yq -r '.filename' hacs.json)"
-            if [ -z "$hacs_filename" ]; then
-              echo >&2 "No filename found in hacs.json. Please check your HACS configuration."
-              exit 1
-            fi
+          domain="$(yq -r -oj '.domain' custom_components/*/manifest.json)"
+          if [ -z "$domain" ]; then
+            echo >&2 "No domain found in manifest.json. Please check your custom component."
+            exit 1
+          fi
 
-            echo "domain=${domain}"
-            echo "component_dir=custom_components/${domain}"
-            echo "hacs_filename=${hacs_filename}"
+          hacs_filename="$(yq -r '.filename' hacs.json)"
+          if [ -z "$hacs_filename" ] || [ "$hacs_filename" = "null" ]; then
+            echo >&2 "No filename found in hacs.json. Please check your HACS configuration."
+            exit 1
+          fi
 
-            if [ -z '${{ inputs.version }}' ]; then
-              echo >&2 "No version provided. Using the tag name as version."
-              tag_name='${{ github.ref_name }}'
-              echo "tag_name=${tag_name}"
-              echo "version=${tag_name#v}"
-            else
-              echo "version=${{ inputs.version }}"
-              echo "tag_name=v${{ inputs.version }}"
-            fi
-          } | tee "$GITHUB_OUTPUT"
+          echo "domain=${domain}" >> "$GITHUB_OUTPUT"
+          echo "component_dir=custom_components/${domain}" >> "$GITHUB_OUTPUT"
+          echo "hacs_filename=${hacs_filename}" >> "$GITHUB_OUTPUT"
+
+          if [ -n '${{ inputs.version }}' ]; then
+            echo "version=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+            echo "tag_name=v${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            tag_name='${{ github.ref_name }}'
+            echo "tag_name=${tag_name}" >> "$GITHUB_OUTPUT"
+            echo "version=${tag_name#v}" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Sanity check
         shell: bash
@@ -102,4 +100,4 @@ jobs:
           body: '${{ needs.prepare.outputs.release_body }}'
           tag_name: '${{ needs.prepare.outputs.tag_name }}'
           target_commitish: '${{ github.sha }}'
-          files: ${{ needs.prepare.outputs.component_dir }}/${{ needs.prepare.outputs.hacs_filename }}
+          files: ${{ needs.prepare.outputs.component_dir }}/migros_list.zip
