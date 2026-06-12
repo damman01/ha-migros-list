@@ -36,7 +36,7 @@ class MigrosConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             else:
                 client = MigrosApiClient(access_token=token)
                 try:
-                    lists = await client.async_get_lists_overview(self.hass)
+                    await client.async_validate_token(self.hass)
                 except MigrosApiAuthError:
                     errors["base"] = "invalid_auth"
                 except MigrosApiError:
@@ -44,12 +44,14 @@ class MigrosConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 except Exception:
                     errors["base"] = "unknown"
                 else:
-                    if not lists:
-                        errors["base"] = "no_lists"
-                    else:
-                        self._token = token
-                        self._available_lists = {entry["id"]: entry["name"] for entry in lists}
-                        return await self.async_step_select_list()
+                    # Token valid; fetch available lists (best-effort, falls back to text input)
+                    try:
+                        lists = await client.async_get_lists_overview(self.hass)
+                    except MigrosApiError:
+                        lists = []
+                    self._token = token
+                    self._available_lists = {entry["id"]: entry["name"] for entry in lists}
+                    return await self.async_step_select_list()
 
         return self.async_show_form(
             step_id="user",
@@ -63,7 +65,37 @@ class MigrosConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             list_id = user_input[CONF_LIST_ID]
-            list_name = self._available_lists[list_id]
+            if isinstance(list_id, str):
+                list_id = list_id.strip()
+
+            if self._available_lists:
+                list_name = self._available_lists[list_id]
+            else:
+                # Manual ID entry — validate by fetching the list
+                client = MigrosApiClient(access_token=self._token, shopping_list_id=list_id)
+                try:
+                    shopping_list = await client.async_get_shopping_list(self.hass)
+                    list_name = shopping_list.name
+                except MigrosApiAuthError:
+                    errors["base"] = "invalid_auth"
+                except MigrosApiHttpError as err:
+                    if err.status_code == 404:
+                        errors["base"] = "invalid_list_id"
+                    elif err.status_code == 429:
+                        errors["base"] = "rate_limited"
+                    else:
+                        errors["base"] = "cannot_connect"
+                except MigrosApiError:
+                    errors["base"] = "cannot_connect"
+                except Exception:
+                    errors["base"] = "unknown"
+
+                if errors:
+                    return self.async_show_form(
+                        step_id="select_list",
+                        data_schema=vol.Schema({vol.Required(CONF_LIST_ID): str}),
+                        errors=errors,
+                    )
 
             await self.async_set_unique_id(list_id)
             self._abort_if_unique_id_configured()
@@ -77,11 +109,14 @@ class MigrosConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 options={CONF_UPDATE_INTERVAL: DEFAULT_UPDATE_INTERVAL},
             )
 
+        if self._available_lists:
+            schema = vol.Schema({vol.Required(CONF_LIST_ID): vol.In(self._available_lists)})
+        else:
+            schema = vol.Schema({vol.Required(CONF_LIST_ID): str})
+
         return self.async_show_form(
             step_id="select_list",
-            data_schema=vol.Schema(
-                {vol.Required(CONF_LIST_ID): vol.In(self._available_lists)}
-            ),
+            data_schema=schema,
             errors=errors,
         )
 

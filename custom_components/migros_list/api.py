@@ -35,6 +35,22 @@ class MigrosApiClient:
     def shopping_list_id(self) -> str:
         return self._shopping_list_id
 
+    async def async_validate_token(self, hass) -> None:
+        """Validate bearer token via OIDC userinfo. Raises MigrosApiAuthError if rejected."""
+        session = async_get_clientsession(hass)
+        try:
+            async with session.get(
+                "https://login.migros.ch/oauth2/userinfo",
+                headers={"authorization": f"Bearer {self._access_token}"},
+            ) as response:
+                response.raise_for_status()
+        except ClientResponseError as err:
+            if err.status in (401, 403):
+                raise MigrosApiAuthError("Token rejected by auth server") from err
+            raise MigrosApiHttpError(err.status) from err
+        except ClientError as err:
+            raise MigrosApiError("Could not reach Migros auth server") from err
+
     async def async_get_lists_overview(self, hass) -> list[dict[str, Any]]:
         session = async_get_clientsession(hass)
         try:
