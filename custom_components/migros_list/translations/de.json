@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Bei Migros anmelden",
-        "description": "So erhältst du deinen Access-Token:\n1. Öffne [migros.ch]({shopping_list_url}) und melde dich an.\n2. Öffne die Browser-Entwicklertools (F12) und gehe zum Tab **Netzwerk**.\n3. Filtere nach `login-success`.\n4. Lade die Seite neu — öffne die **Antwort** der `login-success`-Anfrage.\n5. Kopiere das gesamte JSON-Objekt (beginnend mit `{`) oder nur den Wert von `accessToken` und füge es unten ein.",
+        "description": "Öffne [migros.ch]({shopping_list_url}), melde dich an, dann DevTools (F12) → Netzwerk, nach `login-success` filtern, Seite neu laden und die JSON-Antwort oder nur den `accessToken`-Wert unten einfügen.",
         "data": {
           "access_token": "Access-Token (oder vollständige JSON-Antwort)"
         }
@@ -17,7 +17,7 @@
       },
       "reauth_confirm": {
         "title": "Migros erneut verbinden",
-        "description": "Dein Migros-Token ist abgelaufen. Hol dir einen neuen:\n1. Öffne [migros.ch]({shopping_list_url}) und melde dich an.\n2. Öffne die Browser-Entwicklertools (F12) und gehe zum Tab **Netzwerk**.\n3. Filtere nach `login-success`.\n4. Lade die Seite neu — öffne die **Antwort** der `login-success`-Anfrage.\n5. Kopiere das gesamte JSON-Objekt (beginnend mit `{`) oder nur den Wert von `accessToken` und füge es unten ein.",
+        "description": "Dein Token ist abgelaufen. Öffne [migros.ch]({shopping_list_url}), melde dich an, dann DevTools (F12) → Netzwerk, nach `login-success` filtern, Seite neu laden und die JSON-Antwort oder nur den `accessToken`-Wert unten einfügen.",
         "data": {
           "access_token": "Access-Token (oder vollständige JSON-Antwort)"
         }

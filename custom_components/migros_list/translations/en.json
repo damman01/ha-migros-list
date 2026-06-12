@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Sign in to Migros",
-        "description": "To get your access token:\n1. Open [migros.ch]({shopping_list_url}) and sign in.\n2. Open your browser's developer tools (F12) and go to the **Network** tab.\n3. Filter requests by `login-success`.\n4. Reload the page — find the `login-success` request and open its **Response**.\n5. Copy the entire JSON object (starting with `{`) or just the `accessToken` value and paste it below.",
+        "description": "Open [migros.ch]({shopping_list_url}), sign in, then open DevTools (F12) → Network, filter for `login-success`, reload, and paste the response JSON or just the `accessToken` value below.",
         "data": {
           "access_token": "Access token (or full JSON response)"
         }
@@ -17,7 +17,7 @@
       },
       "reauth_confirm": {
         "title": "Reconnect Migros",
-        "description": "Your Migros token has expired. Get a new one:\n1. Open [migros.ch]({shopping_list_url}) and sign in.\n2. Open your browser's developer tools (F12) and go to the **Network** tab.\n3. Filter requests by `login-success`.\n4. Reload the page — find the `login-success` request and open its **Response**.\n5. Copy the entire JSON object (starting with `{`) or just the `accessToken` value and paste it below.",
+        "description": "Your token has expired. Open [migros.ch]({shopping_list_url}), sign in, open DevTools (F12) → Network, filter for `login-success`, reload, and paste the response JSON or just the `accessToken` value below.",
         "data": {
           "access_token": "Access token (or full JSON response)"
         }
