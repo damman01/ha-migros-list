@@ -1,5 +1,8 @@
 {
   "name": "Migros Shopping List",
+  "filename": "migros_list.zip",
+  "hide_default_branch": true,
+  "homeassistant": "2024.1.0",
   "render_readme": true,
-  "homeassistant": ">=2024.1.0"
+  "zip_release": true
 }
