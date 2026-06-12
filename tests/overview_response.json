@@ -1,0 +1,35 @@
+{
+  "shoppingListId": 346969,
+  "name": "Einkaufsliste",
+  "totals": {
+    "instoreTotal": 1.1,
+    "onlineTotal": {
+      "estimatedTotal": 0,
+      "credits": 0,
+      "freeDelivery": true,
+      "firstOrder": true,
+      "deliveryPassActive": false,
+      "minimumOrderValueReached": false,
+      "limitedCategories": []
+    },
+    "frozenBoxProgressBarValue": 0,
+    "showFrozenBox": false
+  },
+  "categories": [
+    {
+      "id": 7494734,
+      "items": [
+        {
+          "id": "100024917",
+          "type": "PRODUCT",
+          "quantity": 1,
+          "name": "Vanille",
+          "note": "",
+          "isEcomPromotionalOfferApplied": false,
+          "ecomProductAvailability": "UNAVAILABLE"
+        }
+      ],
+      "showFrozenBox": false
+    }
+  ]
+}
