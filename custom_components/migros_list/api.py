@@ -6,7 +6,7 @@ from typing import Any
 from aiohttp import ClientError, ClientResponseError
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .const import MIGROS_LANGUAGE, MIGROS_LIST_DETAILS_URL, MIGROS_LISTS_OVERVIEW_URL, MIGROS_PEER_ID, MIGROS_REFERER
+from .const import MIGROS_LIST_DETAILS_URL, MIGROS_LISTS_OVERVIEW_URL
 from .models import MigrosCategory, MigrosShoppingList, MigrosShoppingListItem, MigrosTotals
 
 
@@ -100,9 +100,6 @@ class MigrosApiClient:
         return {
             "accept": "application/json, text/plain, */*",
             "authorization": f"Bearer {self._access_token}",
-            "migros-language": MIGROS_LANGUAGE,
-            "peer-id": MIGROS_PEER_ID,
-            "referer": MIGROS_REFERER,
         }
 
     def _parse_shopping_list(self, payload: dict[str, Any]) -> MigrosShoppingList:
